@@ -11,8 +11,6 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png"/>
   <link rel="manifest" href="manifest.json"/>
   <title>City Metro</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --navy:     #003f8a;
@@ -30,8 +28,8 @@
       --red:      #c0212b;
       --safe-t:   env(safe-area-inset-top, 0px);
       --safe-b:   env(safe-area-inset-bottom, 0px);
-      --font:     'Barlow', sans-serif;
-      --font-cond:'Barlow Condensed', sans-serif;
+      --font:     'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --font-cond:'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -256,19 +254,6 @@
     }
     .search-bar input::placeholder { color: var(--muted2); }
 
-    /* Image gallery */
-    .gallery-strip {
-      display: flex; gap: 10px;
-      overflow-x: auto; padding: 18px 18px 0;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .gallery-strip::-webkit-scrollbar { display: none; }
-    .gallery-img {
-      width: 160px; height: 100px; flex-shrink: 0;
-      border-radius: 12px; object-fit: cover;
-      background: var(--border);
-    }
 
     /* Quick cards */
     .section-head {
@@ -430,6 +415,83 @@
       font-size: 13px; color: #065f46; margin-top: 12px;
     }
 
+
+    /* ── SSO / AUTH ── */
+    .auth-bar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+      font-size: 13px;
+    }
+    .auth-bar.signed-in { background: #f0fdf4; border-color: #a7f3d0; }
+    .auth-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--navy); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; flex-shrink: 0;
+    }
+    .auth-info { flex: 1; }
+    .auth-name { font-weight: 600; color: var(--text); font-size: 13px; }
+    .auth-sub  { font-size: 10px; color: var(--muted); margin-top: 1px; }
+    .auth-btn {
+      font-family: var(--font); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer;
+      transition: background .15s;
+    }
+    .auth-btn.sign-in { background: var(--navy); color: white; }
+    .auth-btn.sign-in:hover { background: var(--blue); }
+    .auth-btn.sign-out { background: #fef2f2; color: var(--red); border: 1px solid #fecaca; }
+
+    /* SSO modal */
+    .sso-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      z-index: 500; display: flex; align-items: flex-end;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .sso-modal-overlay.open { opacity: 1; pointer-events: all; }
+    .sso-modal {
+      background: var(--surface); border-radius: 20px 20px 0 0;
+      padding: 28px 24px calc(var(--safe-b) + 28px);
+      width: 100%; transform: translateY(100%);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .sso-modal-overlay.open .sso-modal { transform: translateY(0); }
+    .sso-modal h3 {
+      font-family: var(--font); font-size: 18px; font-weight: 700;
+      color: var(--text); margin-bottom: 6px; text-align: center;
+    }
+    .sso-modal p { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 22px; }
+    .sso-field { margin-bottom: 12px; }
+    .sso-field label {
+      display: block; font-size: 11px; font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px;
+    }
+    .sso-field input {
+      width: 100%; background: var(--bg); border: 1.5px solid var(--border);
+      color: var(--text); font-family: var(--font); font-size: 14px;
+      padding: 11px 12px; border-radius: 8px; outline: none;
+      transition: border-color .15s;
+    }
+    .sso-field input:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(0,63,138,.1); }
+    .sso-login-btn {
+      width: 100%; background: var(--navy); color: white;
+      border: none; border-radius: 8px; padding: 13px;
+      font-family: var(--font); font-size: 14px; font-weight: 700;
+      letter-spacing: .04em; text-transform: uppercase;
+      cursor: pointer; margin-top: 4px; transition: background .15s;
+    }
+    .sso-login-btn:hover { background: var(--blue); }
+    .sso-cancel {
+      width: 100%; background: none; border: none; padding: 12px;
+      font-family: var(--font); font-size: 13px; color: var(--muted);
+      cursor: pointer; margin-top: 4px;
+    }
+    .sso-error {
+      background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;
+      padding: 10px 12px; font-size: 12px; color: var(--red);
+      margin-bottom: 12px; display: none;
+    }
+
     .support-footer {
       text-align: center; padding: 8px 18px 8px;
       font-size: 11px; color: var(--muted2); line-height: 1.8;
@@ -489,6 +551,10 @@
       </button>
 
       <div class="drawer-section-label">More</div>
+      <button class="drawer-item" id="di-brickpass" onclick="navTo('brickpass')">
+        <div class="di-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+        <span class="di-label">My BrickPass</span>
+      </button>
       <button class="drawer-item" id="di-support" onclick="navTo('support')">
         <div class="di-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
         <span class="di-label">Support</span>
@@ -521,15 +587,6 @@
         <div id="search-results-inner"></div>
       </div>
 
-      <!-- Photo gallery -->
-      <div class="gallery-strip" id="gallery-strip">
-        <img class="gallery-img" src="https://images.unsplash.com/photo-1555400082-f91a5fd2e94b?w=320&q=80" alt="Metro train" loading="lazy"/>
-        <img class="gallery-img" src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=320&q=80" alt="Station platform" loading="lazy"/>
-        <img class="gallery-img" src="https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=320&q=80" alt="City transit" loading="lazy"/>
-        <img class="gallery-img" src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=320&q=80" alt="Rail network" loading="lazy"/>
-        <img class="gallery-img" src="https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=320&q=80" alt="Train station" loading="lazy"/>
-      </div>
-
       <div class="section-head"><h2>Services</h2></div>
       <div class="cards-grid">
         <a class="nav-card" onclick="navTo('arrivals')">
@@ -552,10 +609,15 @@
           <div class="nc-title">Alerts</div>
           <div class="nc-desc">Service disruptions & news</div>
         </a>
-        <a class="nav-card" onclick="navTo('support')" style="grid-column:span 2">
+        <a class="nav-card" onclick="navTo('brickpass')">
+          <div class="nc-icon" style="background:#fce7f3">🎫</div>
+          <div class="nc-title">My BrickPass</div>
+          <div class="nc-desc">Manage your pass and account</div>
+        </a>
+        <a class="nav-card" onclick="navTo('support')">
           <div class="nc-icon" style="background:#ede9fe">💬</div>
-          <div class="nc-title">Contact Support</div>
-          <div class="nc-desc">Get help from our team — call, email, or send a message</div>
+          <div class="nc-title">Support</div>
+          <div class="nc-desc">Contact our team for help</div>
         </a>
       </div>
 
@@ -565,8 +627,8 @@
         <div class="status-row"><div class="line-bubble" style="background:#b45309">E</div><div class="status-name">E Line — Gold</div><div class="status-badge good">Good Service</div></div>
         <div class="status-row"><div class="line-bubble" style="background:#b91c1c">F</div><div class="status-name">F Line — Orange</div><div class="status-badge good">Good Service</div></div>
         <div class="status-row"><div class="line-bubble" style="background:#db2777">K</div><div class="status-name">K Line — Pink</div><div class="status-badge good">Good Service</div></div>
-        <div class="status-row"><div class="line-bubble" style="background:#f50202">B</div><div class="status-name">B Line — Purple</div><div class="status-badge good">Good Service</div></div>
-        <div class="status-row"><div class="line-bubble" style="background:#6d28d9">D</div><div class="status-name">D Line — Teal</div><div class="status-badge good">Good Service</div></div>
+        <div class="status-row"><div class="line-bubble" style="background:#dc2626">B</div><div class="status-name">B Line — Red</div><div class="status-badge good">Good Service</div></div>
+        <div class="status-row"><div class="line-bubble" style="background:#7c3aed">D</div><div class="status-name">D Line — Purple</div><div class="status-badge good">Good Service</div></div>
       </div>
 
       <div class="home-footer">
@@ -580,6 +642,14 @@
       <div class="support-hero">
         <h1>Support</h1>
         <p>We're here to help you with your City Metro journey</p>
+      </div>
+      <div id="support-auth-bar" class="auth-bar">
+        <div class="auth-avatar" id="support-avatar">?</div>
+        <div class="auth-info">
+          <div class="auth-name" id="support-auth-name">Not signed in</div>
+          <div class="auth-sub">Sign in to auto-fill your details</div>
+        </div>
+        <button class="auth-btn sign-in" id="support-auth-btn" onclick="openSSO()">Sign In</button>
       </div>
       <div class="support-body">
 
@@ -696,50 +766,195 @@
       <div class="tab-icon-wrap"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
       <span class="tab-lbl">Alerts</span>
     </button>
+    <button class="tab" id="tab-brickpass" onclick="navTo('brickpass')">
+      <div class="tab-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+      <span class="tab-lbl">BrickPass</span>
+    </button>
   </nav>
+
+
+<!-- SSO MODAL -->
+<div class="sso-modal-overlay" id="sso-overlay" onclick="closeSSOOutside(event)">
+  <div class="sso-modal">
+    <h3>Sign in to City Metro</h3>
+    <p>Use your City Metro account to access personalised services.</p>
+    <div class="sso-error" id="sso-error">Incorrect email or password. Please try again.</div>
+    <div class="sso-field">
+      <label>Email Address</label>
+      <input type="email" id="sso-email" placeholder="you@example.com" autocomplete="email"/>
+    </div>
+    <div class="sso-field">
+      <label>Password</label>
+      <input type="password" id="sso-password" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="sso-login-btn" onclick="doLogin()">Sign In</button>
+    <button class="sso-cancel" onclick="closeSSO()">Cancel</button>
+  </div>
+</div>
 
 </div>
 
 <script>
 /* ── External page URLs ── */
 const PAGES = {
-  arrivals: 'https://livearrivals.citymetro.xyz',
-  planner:  'https://trip-planner.citymetro.xyz',
-  map:      'https://map.citymetro.xyz',
-  alerts:   'https://alerts.citymetro.xyz',
+  arrivals:  'https://livearrivals.citymetro.xyz',
+  planner:   'https://trip-planner.citymetro.xyz',
+  map:       'https://map.citymetro.xyz',
+  alerts:    'https://alerts.citymetro.xyz',
+  brickpass: 'https://mybrickpass.citymetro.xyz',
 };
 
-/* ── Page titles ── */
 const TITLES = {
   home: 'City Metro', arrivals: 'Live Arrivals',
   planner: 'Trip Planner', map: 'System Map',
   alerts: 'Service Alerts', support: 'Support',
+  brickpass: 'My BrickPass',
 };
 
 /* ── Greeting ── */
 const h = new Date().getHours();
 document.getElementById('greeting').textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
 
-/* ── Navigation ── */
+/* ══════════════════════════════════════════════
+   SSO — simple client-side auth
+   In production, swap doLogin() to call your
+   actual auth API. Stores session in localStorage.
+══════════════════════════════════════════════ */
+let currentUser = null;
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem('cm_user');
+    if (raw) currentUser = JSON.parse(raw);
+  } catch {}
+  updateAuthUI();
+}
+
+function saveSession(user) {
+  currentUser = user;
+  localStorage.setItem('cm_user', JSON.stringify(user));
+  updateAuthUI();
+}
+
+function clearSession() {
+  currentUser = null;
+  localStorage.removeItem('cm_user');
+  updateAuthUI();
+}
+
+function updateAuthUI() {
+  const bar  = document.getElementById('support-auth-bar');
+  const name = document.getElementById('support-auth-name');
+  const btn  = document.getElementById('support-auth-btn');
+  const ava  = document.getElementById('support-avatar');
+
+  if (currentUser) {
+    bar.classList.add('signed-in');
+    name.textContent = currentUser.name;
+    ava.textContent  = currentUser.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+    btn.textContent  = 'Sign Out';
+    btn.className    = 'auth-btn sign-out';
+    btn.onclick      = signOut;
+
+    // Auto-fill support form
+    const nameEl  = document.querySelector('#support-form [name="name"]');
+    const emailEl = document.querySelector('#support-form [name="email"]');
+    if (nameEl)  nameEl.value  = currentUser.name;
+    if (emailEl) emailEl.value = currentUser.email;
+  } else {
+    bar.classList.remove('signed-in');
+    name.textContent = 'Not signed in';
+    ava.textContent  = '?';
+    btn.textContent  = 'Sign In';
+    btn.className    = 'auth-btn sign-in';
+    btn.onclick      = openSSO;
+
+    // Clear auto-filled fields
+    const nameEl  = document.querySelector('#support-form [name="name"]');
+    const emailEl = document.querySelector('#support-form [name="email"]');
+    if (nameEl)  nameEl.value  = '';
+    if (emailEl) emailEl.value = '';
+  }
+}
+
+function openSSO() {
+  document.getElementById('sso-overlay').classList.add('open');
+  document.getElementById('sso-error').style.display = 'none';
+  setTimeout(() => document.getElementById('sso-email').focus(), 300);
+}
+
+function closeSSO() {
+  document.getElementById('sso-overlay').classList.remove('open');
+}
+
+function closeSSOOutside(e) {
+  if (e.target === document.getElementById('sso-overlay')) closeSSO();
+}
+
+function signOut() {
+  clearSession();
+}
+
+async function doLogin() {
+  const email    = document.getElementById('sso-email').value.trim();
+  const password = document.getElementById('sso-password').value;
+  const errEl    = document.getElementById('sso-error');
+
+  if (!email || !password) {
+    errEl.textContent = 'Please enter your email and password.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  /* ── DEMO AUTH ──────────────────────────────────
+     Replace this block with a real API call, e.g.:
+       const res = await fetch('https://auth.citymetro.xyz/login', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ email, password })
+       });
+       const data = await res.json();
+       if (!res.ok) throw new Error(data.message);
+       saveSession({ name: data.name, email: data.email, id: data.id });
+  ─────────────────────────────────────────────── */
+  const DEMO_USERS = [
+    { email: 'rider@citymetro.xyz', password: 'metro2026', name: 'Demo Rider' },
+  ];
+  const match = DEMO_USERS.find(u => u.email === email && u.password === password);
+  if (match) {
+    saveSession({ name: match.name, email: match.email });
+    closeSSO();
+    document.getElementById('sso-email').value    = '';
+    document.getElementById('sso-password').value = '';
+  } else {
+    errEl.textContent = 'Incorrect email or password. Please try again.';
+    errEl.style.display = 'block';
+  }
+}
+
+/* Allow Enter key in SSO fields */
+document.getElementById('sso-password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+/* ══════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════ */
 let current  = 'home';
 const loaded = new Set();
 
 function navTo(page) {
   closeDrawer();
 
-  // Deactivate all
   document.querySelectorAll('.page, .iframe-page').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.tab, .drawer-item').forEach(el => el.classList.remove('active'));
 
-  // Activate target
   document.getElementById(`page-${page}`).classList.add('active');
   document.getElementById(`tab-${page}`)?.classList.add('active');
   document.getElementById(`di-${page}`)?.classList.add('active');
 
-  // Update title
   document.getElementById('topbar-title').textContent = TITLES[page] || 'City Metro';
 
-  // Lazy-load iframe
   if (PAGES[page] && !loaded.has(page)) {
     loaded.add(page);
     const frame   = document.getElementById(`frame-${page}`);
@@ -749,7 +964,6 @@ function navTo(page) {
   }
 
   current = page;
-  // Update URL without reload
   history.pushState({ page }, '', `/?page=${page}`);
 }
 
@@ -763,33 +977,33 @@ function closeDrawer() {
   document.getElementById('drawer-overlay').classList.remove('open');
 }
 
-/* ── Search ── */
+/* ══════════════════════════════════════════════
+   SEARCH
+══════════════════════════════════════════════ */
 const SEARCH_INDEX = [
-  { label: 'Live Arrivals',   desc: 'Real-time train times',       action: () => navTo('arrivals') },
-  { label: 'Trip Planner',    desc: 'Plan a journey',               action: () => navTo('planner') },
-  { label: 'System Map',      desc: 'View the rail network',        action: () => navTo('map') },
-  { label: 'Service Alerts',  desc: 'Disruptions & announcements',  action: () => navTo('alerts') },
-  { label: 'Support',         desc: 'Contact our team',             action: () => navTo('support') },
-  { label: 'Union Station',   desc: 'A · E · K Lines',              action: () => navTo('arrivals') },
-  { label: 'Airport Metro TC',desc: 'A · E · F Lines',              action: () => navTo('arrivals') },
-  { label: 'Downtown Lego City', desc: 'A · E Lines',               action: () => navTo('arrivals') },
-  { label: 'Santa Mooica',    desc: 'A Line terminus',              action: () => navTo('arrivals') },
-  { label: 'Table Central',   desc: 'E Line terminus',              action: () => navTo('arrivals') },
-  { label: 'Asian Town',      desc: 'K Line terminus',              action: () => navTo('arrivals') },
-  { label: 'FLX Terminal 2',  desc: 'F Line terminus',              action: () => navTo('arrivals') },
-  { label: 'Phone: 213-600-6570', desc: 'M–F 3:30–6 PM, Sat–Sun 9–9', action: () => navTo('support') },
-  { label: 'Email: hello@citymetro.xyz', desc: '12–24 hr response', action: () => navTo('support') },
+  { label: 'Live Arrivals',         desc: 'Real-time train times',          action: () => navTo('arrivals') },
+  { label: 'Trip Planner',          desc: 'Plan a journey',                  action: () => navTo('planner') },
+  { label: 'System Map',            desc: 'View the rail network',           action: () => navTo('map') },
+  { label: 'Service Alerts',        desc: 'Disruptions & announcements',     action: () => navTo('alerts') },
+  { label: 'My BrickPass',          desc: 'Manage your transit pass',        action: () => navTo('brickpass') },
+  { label: 'Support',               desc: 'Contact our team',                action: () => navTo('support') },
+  { label: 'Union Station',         desc: 'A · E · K Lines',                 action: () => navTo('arrivals') },
+  { label: 'Airport Metro TC',      desc: 'A · E · F Lines',                 action: () => navTo('arrivals') },
+  { label: 'Downtown Lego City',    desc: 'A · E Lines',                     action: () => navTo('arrivals') },
+  { label: 'Santa Mooica',          desc: 'A Line terminus',                 action: () => navTo('arrivals') },
+  { label: 'Table Central',         desc: 'E Line terminus',                 action: () => navTo('arrivals') },
+  { label: 'Asian Town',            desc: 'K Line terminus',                 action: () => navTo('arrivals') },
+  { label: 'FLX Terminal 2',        desc: 'F Line terminus',                 action: () => navTo('arrivals') },
+  { label: 'Phone: 213-600-6570',   desc: 'M–F 3:30–6 PM · Sat–Sun 9–9 PM', action: () => navTo('support') },
+  { label: 'Email: hello@citymetro.xyz', desc: '12–24 hr response',          action: () => navTo('support') },
 ];
 
 function handleSearch(val) {
-  const q = val.trim().toLowerCase();
-  const res = document.getElementById('search-results');
-  const inner = document.getElementById('search-results-inner');
-  const gallery = document.getElementById('gallery-strip');
+  const q       = val.trim().toLowerCase();
+  const res     = document.getElementById('search-results');
+  const inner   = document.getElementById('search-results-inner');
 
-  if (!q) { res.style.display = 'none'; gallery.style.display = ''; return; }
-
-  gallery.style.display = 'none';
+  if (!q) { res.style.display = 'none'; return; }
   res.style.display = 'block';
 
   const matches = SEARCH_INDEX.filter(i =>
@@ -805,8 +1019,7 @@ function handleSearch(val) {
     <div onclick="searchItems[${idx}]()" style="
       display:flex;align-items:center;gap:12px;
       background:var(--surface);border:1px solid var(--border);
-      border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;
-    ">
+      border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;">
       <div style="flex:1">
         <div style="font-size:14px;font-weight:600;color:var(--text)">${m.label}</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px">${m.desc}</div>
@@ -815,44 +1028,38 @@ function handleSearch(val) {
     </div>
   `).join('');
 
-  // Store action refs
   window.searchItems = matches.map(m => m.action);
 }
 
-/* ── Support form ── */
+/* ══════════════════════════════════════════════
+   SUPPORT FORM
+══════════════════════════════════════════════ */
 function submitForm(e) {
   e.preventDefault();
-  const form = e.target;
-  const data = new FormData(form);
-
-  // Build mailto link as fallback (Formspree recommended for real use)
+  const form    = e.target;
+  const data    = new FormData(form);
   const subject = encodeURIComponent(`[City Metro Support] ${data.get('subject')}`);
-  const body = encodeURIComponent(
+  const body    = encodeURIComponent(
     `Name: ${data.get('name')}\nEmail: ${data.get('email')}\n\n${data.get('message')}`
   );
-
-  // Open mail client
   window.location.href = `mailto:hello@citymetro.xyz?subject=${subject}&body=${body}`;
-
-  // Show success
   document.getElementById('form-success').style.display = 'block';
   form.reset();
+  // Re-fill if signed in
+  if (currentUser) {
+    form.elements.name.value  = currentUser.name;
+    form.elements.email.value = currentUser.email;
+  }
 }
 
-/* ── Deep link on load ── */
+/* ── Deep link + init ── */
+loadSession();
 const urlPage = new URLSearchParams(location.search).get('page');
-if (urlPage && PAGES[urlPage]) navTo(urlPage);
-else if (urlPage === 'support') navTo('support');
+if (urlPage && (PAGES[urlPage] || urlPage === 'support' || urlPage === 'home')) navTo(urlPage);
 
-/* ── Back button ── */
-window.addEventListener('popstate', e => {
-  if (e.state?.page) navTo(e.state.page);
-});
+window.addEventListener('popstate', e => { if (e.state?.page) navTo(e.state.page); });
 
-/* ── Service Worker ── */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
-}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>
