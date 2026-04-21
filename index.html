@@ -742,6 +742,22 @@
       <iframe id="frame-alerts" title="Service Alerts" allowfullscreen></iframe>
     </div>
 
+    <!-- BRICKPASS — opens in new tab if iframe blocked -->
+    <div class="iframe-page" id="page-brickpass">
+      <div class="iframe-loading" id="loading-brickpass"><div class="spinner"></div><div class="loading-lbl">Loading My BrickPass…</div></div>
+      <div class="iframe-blocked" id="blocked-brickpass" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;background:var(--bg)">
+        <div style="font-size:40px;margin-bottom:16px">🎫</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px">My BrickPass</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:24px;max-width:260px;line-height:1.5">BrickPass needs to open in your browser for the best experience.</div>
+        <a href="https://mybrickpass.citymetro.xyz" target="_blank" rel="noopener"
+          style="background:var(--navy);color:white;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase">
+          Open My BrickPass ↗
+        </a>
+      </div>
+      <iframe id="frame-brickpass" title="My BrickPass" allowfullscreen
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"></iframe>
+    </div>
+
   </div>
 
   <!-- BOTTOM TAB BAR -->
@@ -810,7 +826,29 @@ async function loadSession() {
   const urlToken = params.get('token');
   if (urlToken) {
     localStorage.setItem('cm_token', urlToken);
+    // Restore the page the user was on when they clicked Sign In
+    const savedPage = localStorage.getItem('cm_sso_return_page');
+    localStorage.removeItem('cm_sso_return_page');
+    // Clean URL then navigate to saved page
     history.replaceState({}, '', location.pathname);
+    const token = urlToken;
+    try {
+      const res  = await fetch(`${SSO_API}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error();
+      currentUser = await res.json();
+    } catch {
+      localStorage.removeItem('cm_token');
+      currentUser = null;
+    }
+    updateAuthUI();
+    // Navigate to the page they were on (default: support since that's where sign-in lives)
+    const returnPage = savedPage || 'support';
+    if (returnPage && (PAGES[returnPage] || returnPage === 'support' || returnPage === 'home')) {
+      navTo(returnPage);
+    }
+    return;
   }
 
   const token = localStorage.getItem('cm_token');
@@ -833,7 +871,8 @@ async function loadSession() {
 }
 
 function openSSO() {
-  // Redirect to SSO, come back to this page with ?token=
+  // Save which page the user is on so we can return them there after sign-in
+  localStorage.setItem('cm_sso_return_page', current);
   const redirect = encodeURIComponent(window.location.href.split('?')[0]);
   window.location.href = `${SSO_URL}?redirect=${redirect}`;
 }
@@ -911,8 +950,42 @@ function navTo(page) {
     loaded.add(page);
     const frame   = document.getElementById(`frame-${page}`);
     const loading = document.getElementById(`loading-${page}`);
-    frame.src = PAGES[page];
-    frame.onload = () => loading.classList.add('done');
+
+    if (page === 'brickpass') {
+      // Try iframe first; if it fails (X-Frame-Options blocked), show fallback
+      frame.src = PAGES[page];
+      let loadedOk = false;
+      frame.onload = () => {
+        loadedOk = true;
+        loading.classList.add('done');
+        // Try to detect if the page was blocked (empty/error document)
+        try {
+          // If we can access contentDocument it loaded fine
+          const doc = frame.contentDocument;
+          if (!doc || doc.body?.innerHTML === '') throw new Error();
+        } catch {
+          // Blocked — show fallback
+          frame.style.display = 'none';
+          document.getElementById('blocked-brickpass').style.display = 'flex';
+        }
+      };
+      frame.onerror = () => {
+        loading.classList.add('done');
+        frame.style.display = 'none';
+        document.getElementById('blocked-brickpass').style.display = 'flex';
+      };
+      // Timeout fallback — if no load event after 5s, assume blocked
+      setTimeout(() => {
+        if (!loadedOk) {
+          loading.classList.add('done');
+          frame.style.display = 'none';
+          document.getElementById('blocked-brickpass').style.display = 'flex';
+        }
+      }, 5000);
+    } else {
+      frame.src = PAGES[page];
+      frame.onload = () => loading.classList.add('done');
+    }
   }
 
   current = page;
@@ -1005,9 +1078,14 @@ function submitForm(e) {
 }
 
 /* ── Deep link + init ── */
-loadSession();
-const urlPage = new URLSearchParams(location.search).get('page');
-if (urlPage && (PAGES[urlPage] || urlPage === 'support' || urlPage === 'home')) navTo(urlPage);
+(async () => {
+  await loadSession();
+  // Only handle ?page= deep link if loadSession didn't already navigate
+  const urlPage = new URLSearchParams(location.search).get('page');
+  if (urlPage && (PAGES[urlPage] || urlPage === 'support' || urlPage === 'home')) {
+    navTo(urlPage);
+  }
+})();
 
 window.addEventListener('popstate', e => { if (e.state?.page) navTo(e.state.page); });
 
