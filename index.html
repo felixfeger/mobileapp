@@ -773,25 +773,7 @@
   </nav>
 
 
-<!-- SSO MODAL -->
-<div class="sso-modal-overlay" id="sso-overlay" onclick="closeSSOOutside(event)">
-  <div class="sso-modal">
-    <h3>Sign in to City Metro</h3>
-    <p>Use your City Metro account to access personalised services.</p>
-    <div class="sso-error" id="sso-error">Incorrect email or password. Please try again.</div>
-    <div class="sso-field">
-      <label>Email Address</label>
-      <input type="email" id="sso-email" placeholder="you@example.com" autocomplete="email"/>
-    </div>
-    <div class="sso-field">
-      <label>Password</label>
-      <input type="password" id="sso-password" placeholder="••••••••" autocomplete="current-password"/>
-    </div>
-    <button class="sso-login-btn" onclick="doLogin()">Sign In</button>
-    <button class="sso-cancel" onclick="closeSSO()">Cancel</button>
-  </div>
-</div>
-
+<!-- SSO handled via redirect to sso.citymetro.xyz -->
 </div>
 
 <script>
@@ -816,29 +798,59 @@ const h = new Date().getHours();
 document.getElementById('greeting').textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
 
 /* ══════════════════════════════════════════════
-   SSO — simple client-side auth
-   In production, swap doLogin() to call your
-   actual auth API. Stores session in localStorage.
+   SSO — Real auth via sso.citymetro.xyz
 ══════════════════════════════════════════════ */
+const SSO_URL = 'https://sso.citymetro.xyz';
+const SSO_API = 'https://sso-api.YOUR_WORKER.workers.dev';
 let currentUser = null;
 
-function loadSession() {
+async function loadSession() {
+  // Check if returning from SSO with a token
+  const params   = new URLSearchParams(location.search);
+  const urlToken = params.get('token');
+  if (urlToken) {
+    localStorage.setItem('cm_token', urlToken);
+    history.replaceState({}, '', location.pathname);
+  }
+
+  const token = localStorage.getItem('cm_token');
+  if (!token) { updateAuthUI(); return; }
+
   try {
-    const raw = localStorage.getItem('cm_user');
-    if (raw) currentUser = JSON.parse(raw);
-  } catch {}
+    const res  = await fetch(`${SSO_API}/auth/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error();
+    const user = await res.json();
+    currentUser = user;
+  } catch {
+    // Token expired or invalid — clear it
+    localStorage.removeItem('cm_token');
+    localStorage.removeItem('cm_user');
+    currentUser = null;
+  }
   updateAuthUI();
 }
 
-function saveSession(user) {
-  currentUser = user;
-  localStorage.setItem('cm_user', JSON.stringify(user));
-  updateAuthUI();
+function openSSO() {
+  // Redirect to SSO, come back to this page with ?token=
+  const redirect = encodeURIComponent(window.location.href.split('?')[0]);
+  window.location.href = `${SSO_URL}?redirect=${redirect}`;
 }
 
-function clearSession() {
-  currentUser = null;
+async function signOut() {
+  const token = localStorage.getItem('cm_token');
+  if (token) {
+    try {
+      await fetch(`${SSO_API}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    } catch {}
+  }
+  localStorage.removeItem('cm_token');
   localStorage.removeItem('cm_user');
+  currentUser = null;
   updateAuthUI();
 }
 
@@ -850,8 +862,9 @@ function updateAuthUI() {
 
   if (currentUser) {
     bar.classList.add('signed-in');
-    name.textContent = currentUser.name;
-    ava.textContent  = currentUser.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+    name.textContent = currentUser.name || `${currentUser.firstName} ${currentUser.lastName}`;
+    ava.textContent  = (currentUser.name || `${currentUser.firstName} ${currentUser.lastName}`)
+      .split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
     btn.textContent  = 'Sign Out';
     btn.className    = 'auth-btn sign-out';
     btn.onclick      = signOut;
@@ -859,7 +872,7 @@ function updateAuthUI() {
     // Auto-fill support form
     const nameEl  = document.querySelector('#support-form [name="name"]');
     const emailEl = document.querySelector('#support-form [name="email"]');
-    if (nameEl)  nameEl.value  = currentUser.name;
+    if (nameEl)  nameEl.value  = currentUser.name || `${currentUser.firstName} ${currentUser.lastName}`;
     if (emailEl) emailEl.value = currentUser.email;
   } else {
     bar.classList.remove('signed-in');
@@ -869,73 +882,12 @@ function updateAuthUI() {
     btn.className    = 'auth-btn sign-in';
     btn.onclick      = openSSO;
 
-    // Clear auto-filled fields
     const nameEl  = document.querySelector('#support-form [name="name"]');
     const emailEl = document.querySelector('#support-form [name="email"]');
     if (nameEl)  nameEl.value  = '';
     if (emailEl) emailEl.value = '';
   }
 }
-
-function openSSO() {
-  document.getElementById('sso-overlay').classList.add('open');
-  document.getElementById('sso-error').style.display = 'none';
-  setTimeout(() => document.getElementById('sso-email').focus(), 300);
-}
-
-function closeSSO() {
-  document.getElementById('sso-overlay').classList.remove('open');
-}
-
-function closeSSOOutside(e) {
-  if (e.target === document.getElementById('sso-overlay')) closeSSO();
-}
-
-function signOut() {
-  clearSession();
-}
-
-async function doLogin() {
-  const email    = document.getElementById('sso-email').value.trim();
-  const password = document.getElementById('sso-password').value;
-  const errEl    = document.getElementById('sso-error');
-
-  if (!email || !password) {
-    errEl.textContent = 'Please enter your email and password.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  /* ── DEMO AUTH ──────────────────────────────────
-     Replace this block with a real API call, e.g.:
-       const res = await fetch('https://auth.citymetro.xyz/login', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ email, password })
-       });
-       const data = await res.json();
-       if (!res.ok) throw new Error(data.message);
-       saveSession({ name: data.name, email: data.email, id: data.id });
-  ─────────────────────────────────────────────── */
-  const DEMO_USERS = [
-    { email: 'rider@citymetro.xyz', password: 'metro2026', name: 'Demo Rider' },
-  ];
-  const match = DEMO_USERS.find(u => u.email === email && u.password === password);
-  if (match) {
-    saveSession({ name: match.name, email: match.email });
-    closeSSO();
-    document.getElementById('sso-email').value    = '';
-    document.getElementById('sso-password').value = '';
-  } else {
-    errEl.textContent = 'Incorrect email or password. Please try again.';
-    errEl.style.display = 'block';
-  }
-}
-
-/* Allow Enter key in SSO fields */
-document.getElementById('sso-password').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
 
 /* ══════════════════════════════════════════════
    NAVIGATION
