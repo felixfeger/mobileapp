@@ -817,7 +817,7 @@ document.getElementById('greeting').textContent = h < 12 ? 'morning' : h < 17 ? 
    SSO — Real auth via sso.citymetro.xyz
 ══════════════════════════════════════════════ */
 const SSO_URL = 'https://sso.citymetro.xyz';
-const SSO_API = 'https://sso-api.YOUR_WORKER.workers.dev';
+const SSO_API = 'https://citymetrosso.felixfeger46.workers.dev/'; // ← replace with your worker URL
 let currentUser = null;
 
 async function loadSession() {
@@ -829,21 +829,26 @@ async function loadSession() {
     // Restore the page the user was on when they clicked Sign In
     const savedPage = localStorage.getItem('cm_sso_return_page');
     localStorage.removeItem('cm_sso_return_page');
-    // Clean URL then navigate to saved page
+    // Clean URL
     history.replaceState({}, '', location.pathname);
-    const token = urlToken;
+
+    // Fetch full user info with the new token
     try {
       const res  = await fetch(`${SSO_API}/auth/me`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${urlToken}` }
       });
-      if (!res.ok) throw new Error();
-      currentUser = await res.json();
-    } catch {
-      localStorage.removeItem('cm_token');
-      currentUser = null;
+      if (res.ok) {
+        currentUser = await res.json();
+        localStorage.setItem('cm_user', JSON.stringify(currentUser));
+      }
+    } catch {}
+
+    // Even if fetch failed, try the stored user data
+    if (!currentUser) {
+      try { currentUser = JSON.parse(localStorage.getItem('cm_user')); } catch {}
     }
+
     updateAuthUI();
-    // Navigate to the page they were on (default: support since that's where sign-in lives)
     const returnPage = savedPage || 'support';
     if (returnPage && (PAGES[returnPage] || returnPage === 'support' || returnPage === 'home')) {
       navTo(returnPage);
@@ -851,22 +856,29 @@ async function loadSession() {
     return;
   }
 
+  // No new token — check existing session
   const token = localStorage.getItem('cm_token');
   if (!token) { updateAuthUI(); return; }
 
+  // Try to validate with API — but fall back to cached user if network fails
   try {
-    const res  = await fetch(`${SSO_API}/auth/me`, {
+    const res = await fetch(`${SSO_API}/auth/me`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    if (!res.ok) throw new Error();
-    const user = await res.json();
-    currentUser = user;
+    if (res.ok) {
+      currentUser = await res.json();
+      localStorage.setItem('cm_user', JSON.stringify(currentUser));
+    } else {
+      // Token rejected by server — clear it
+      localStorage.removeItem('cm_token');
+      localStorage.removeItem('cm_user');
+      currentUser = null;
+    }
   } catch {
-    // Token expired or invalid — clear it
-    localStorage.removeItem('cm_token');
-    localStorage.removeItem('cm_user');
-    currentUser = null;
+    // Network error — use cached user data rather than wiping session
+    try { currentUser = JSON.parse(localStorage.getItem('cm_user')); } catch {}
   }
+
   updateAuthUI();
 }
 
