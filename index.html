@@ -11,6 +11,7 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png"/>
   <link rel="manifest" href="manifest.json"/>
   <title>City Metro</title>
+
   <style>
     :root {
       --navy:     #003f8a;
@@ -56,7 +57,6 @@
       overflow: hidden;
     }
 
-    /* status bar fill for iOS notch */
     .ios-bar {
       height: var(--safe-t);
       background: var(--navy);
@@ -343,7 +343,9 @@
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .loading-lbl {
@@ -426,7 +428,6 @@
     /* ════════════════════════════════════════════
        HOME PAGE
     ════════════════════════════════════════════ */
-
     .home-hero {
       background: var(--navy);
       padding: 24px 18px 32px;
@@ -573,17 +574,15 @@
       border-bottom: none;
     }
 
-    /*
-      LINE IMAGE
-      The image is intentionally separate from the line name.
-      Paste your Wikipedia/Wikimedia image URL into the src="" below.
+    /* LINE IMAGE
+       Each line uses an image instead of a colored circle.
+       Put your Wikipedia/Wikimedia image URL into the src="" attribute.
     */
     .line-image {
       width: 32px;
       height: 32px;
       object-fit: contain;
       flex-shrink: 0;
-      display: block;
     }
 
     .status-name {
@@ -625,7 +624,6 @@
     /* ════════════════════════════════════════════
        SUPPORT PAGE
     ════════════════════════════════════════════ */
-
     .support-hero {
       background: var(--navy);
       padding: 28px 20px 32px;
@@ -1017,6 +1015,7 @@
 </head>
 
 <body>
+
 <div class="app">
 
   <!-- iOS status fill -->
@@ -1045,6 +1044,7 @@
 
     <div class="drawer-header">
       <img src="icons/icon-192.png" class="drawer-logo" alt=""/>
+
       <div class="drawer-brand">
         <h2>City Metro</h2>
         <p>Republic States Transit Authority</p>
@@ -1089,4 +1089,1501 @@
         <div class="di-icon">
           <svg viewBox="0 0 24 24">
             <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
-            <line x1="8" y1="2" x
+            <line x1="8" y1="2" x2="8" y2="18"/>
+            <line x1="16" y1="6" x2="16" y2="22"/>
+          </svg>
+        </div>
+        <span class="di-label">System Map</span>
+      </button>
+
+      <button class="drawer-item" id="di-alerts" onclick="navTo('alerts')">
+        <div class="di-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 01-3.46 0"/>
+          </svg>
+        </div>
+        <span class="di-label">Service Alerts</span>
+      </button>
+
+      <div class="drawer-section-label">More</div>
+
+      <button class="drawer-item" id="di-brickpass" onclick="navTo('brickpass')">
+        <div class="di-icon">
+          <svg viewBox="0 0 24 24">
+            <rect x="2" y="5" width="20" height="14" rx="2"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+        </div>
+        <span class="di-label">My BrickPass</span>
+      </button>
+
+      <button class="drawer-item" id="di-support" onclick="navTo('support')">
+        <div class="di-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+        </div>
+        <span class="di-label">Support</span>
+      </button>
+
+    </nav>
+
+    <div class="drawer-footer">
+      Copyright © 2026 City Metro. All rights reserved.
+    </div>
+
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- HOME PAGE -->
+    <div class="page active" id="page-home">
+
+      <div class="home-hero">
+
+        <h1>
+          <span>Good <span id="greeting">day</span> 👋</span>
+          How can we help you today?
+        </h1>
+
+        <div class="search-bar">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+
+          <input
+            type="text"
+            placeholder="Search stations, lines, info…"
+            id="search-input"
+            oninput="handleSearch(this.value)"
+          />
+        </div>
+
+      </div>
+
+      <!-- Search results -->
+      <div id="search-results" style="display:none;padding:12px 18px;">
+        <div id="search-results-inner"></div>
+      </div>
+
+      <div class="section-head">
+        <h2>Services</h2>
+      </div>
+
+      <div class="cards-grid">
+
+        <a class="nav-card" onclick="navTo('arrivals')">
+          <div class="nc-icon" style="background:#dbeafe">🕐</div>
+          <div class="nc-title">Live Arrivals</div>
+          <div class="nc-desc">Real-time train times at any station</div>
+        </a>
+
+        <a class="nav-card" onclick="navTo('planner')">
+          <div class="nc-icon" style="background:#dcfce7">🗺️</div>
+          <div class="nc-title">Trip Planner</div>
+          <div class="nc-desc">Plan a journey across the network</div>
+        </a>
+
+        <a class="nav-card" onclick="navTo('map')">
+          <div class="nc-icon" style="background:#fef9c3">🚇</div>
+          <div class="nc-title">System Map</div>
+          <div class="nc-desc">View the full metro rail map</div>
+        </a>
+
+        <a class="nav-card" onclick="navTo('alerts')">
+          <div class="nc-icon" style="background:#fee2e2">🔔</div>
+          <div class="nc-title">Alerts</div>
+          <div class="nc-desc">Service disruptions & news</div>
+        </a>
+
+        <a class="nav-card" onclick="navTo('brickpass')">
+          <div class="nc-icon" style="background:#fce7f3">🎫</div>
+          <div class="nc-title">My BrickPass</div>
+          <div class="nc-desc">Manage your pass and account</div>
+        </a>
+
+        <a class="nav-card" onclick="navTo('support')">
+          <div class="nc-icon" style="background:#ede9fe">💬</div>
+          <div class="nc-title">Support</div>
+          <div class="nc-desc">Contact our team for help</div>
+        </a>
+
+      </div>
+
+      <div class="section-head" style="margin-top:8px">
+        <h2>Line Status</h2>
+      </div>
+
+      <div class="status-card" style="margin-bottom:0">
+
+        <!-- =====================================================
+             A LINE IMAGE
+             PASTE YOUR WIKIPEDIA / WIKIMEDIA IMAGE URL HERE
+             Example:
+             src="https://upload.wikimedia.org/..."
+             ===================================================== -->
+        <div class="status-row">
+          <img
+            class="line-image"
+            src=""
+            alt="A Line"
+          />
+          <div class="status-name">A Line</div>
+          <div class="status-badge good">Good Service</div>
+        </div>
+
+        <!-- =====================================================
+             B LINE IMAGE
+             PASTE YOUR WIKIPEDIA / WIKIMEDIA IMAGE URL HERE
+             ===================================================== -->
+        <div class="status-row">
+          <img
+            class="line-image"
+            src=""
+            alt="B Line"
+          />
+          <div class="status-name">B Line</div>
+          <div class="status-badge good">Good Service</div>
+        </div>
+
+        <!-- =====================================================
+             D LINE IMAGE
+             PASTE YOUR WIKIPEDIA / WIKIMEDIA IMAGE URL HERE
+             ===================================================== -->
+        <div class="status-row">
+          <img
+            class="line-image"
+            src=""
+            alt="D Line"
+          />
+          <div class="status-name">D Line</div>
+          <div class="status-badge good">Good Service</div>
+        </div>
+
+        <!-- =====================================================
+             E LINE IMAGE
+             PASTE YOUR WIKIPEDIA / WIKIMEDIA IMAGE URL HERE
+             ===================================================== -->
+        <div class="status-row">
+          <img
+            class="line-image"
+            src=""
+            alt="E Line"
+          />
+          <div class="status-name">E Line</div>
+          <div class="status-badge good">Good Service</div>
+        </div>
+
+        <!-- =====================================================
+             F LINE IMAGE
+             PASTE YOUR WIKIPEDIA / WIKIMEDIA IMAGE URL HERE
+             ===================================================== -->
+        <div class="status-row">
+          <img
+            class="line-image"
+            src=""
+            alt="F Line"
+          />
+          <div class="status-name">F Line</div>
+          <div class="status-badge good">Good Service</div>
+        </div>
+
+        <!-- =====================================================
+             K LINE IMAGE
+             PASTE YOUR WIKIPEDIA / WIKIMEDIA IMAGE URL HERE
+             ===================================================== -->
+        <div class="status-row">
+          <img
+            class="line-image"
+            src=""
+            alt="K Line"
+          />
+          <div class="status-name">K Line</div>
+          <div class="status-badge good">Good Service</div>
+        </div>
+
+      </div>
+
+      <div class="home-footer">
+        Copyright © 2026 City Metro. All rights reserved.<br>
+        An official service of the Republic States Government.
+      </div>
+
+    </div>
+
+    <!-- SUPPORT PAGE -->
+    <div class="page" id="page-support">
+
+      <div class="support-hero">
+        <h1>Support</h1>
+        <p>We're here to help you with your City Metro journey</p>
+      </div>
+
+      <div id="support-auth-bar" class="auth-bar">
+
+        <div class="auth-avatar" id="support-avatar">?</div>
+
+        <div class="auth-info">
+          <div class="auth-name" id="support-auth-name">Not signed in</div>
+          <div class="auth-sub">Sign in to auto-fill your details</div>
+        </div>
+
+        <button
+          class="auth-btn sign-in"
+          id="support-auth-btn"
+          onclick="openSSO()"
+        >
+          Sign In
+        </button>
+
+      </div>
+
+      <div class="support-body">
+
+        <div>
+
+          <div class="support-section-label">Contact Us</div>
+
+          <div class="contact-cards">
+
+            <div class="contact-card">
+
+              <div class="cc-icon" style="background:#dbeafe">
+                📞
+              </div>
+
+              <div>
+                <div class="cc-title">Phone Support</div>
+
+                <a href="tel:+12136006570" class="cc-value">
+                  213-600-6570
+                </a>
+
+                <div class="cc-hours">
+                  Mon – Fri: 3:30 PM – 6:00 PM<br>
+                  Saturday – Sunday: 9:00 AM – 9:00 PM
+                </div>
+              </div>
+
+            </div>
+
+            <div class="contact-card">
+
+              <div class="cc-icon" style="background:#dcfce7">
+                ✉️
+              </div>
+
+              <div>
+                <div class="cc-title">Email Support</div>
+
+                <a href="mailto:hello@citymetro.xyz" class="cc-value">
+                  hello@citymetro.xyz
+                </a>
+
+                <div class="cc-hours">
+                  Response within 12–24 hours
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div>
+
+          <div class="support-section-label">Send a Message</div>
+
+          <div class="form-card">
+
+            <h3>Contact Form</h3>
+
+            <form id="support-form" onsubmit="submitForm(event)">
+
+              <div class="form-field">
+                <label>Your Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  placeholder="First and last name"
+                />
+              </div>
+
+              <div class="form-field">
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="you@example.com"
+                />
+              </div>
+
+              <div class="form-field">
+
+                <label>Subject</label>
+
+                <select name="subject" required>
+                  <option value="">— Select a topic —</option>
+                  <option>Train Delay / Service Issue</option>
+                  <option>Lost & Found</option>
+                  <option>Accessibility</option>
+                  <option>App Feedback</option>
+                  <option>General Inquiry</option>
+                  <option>Other</option>
+                </select>
+
+              </div>
+
+              <div class="form-field">
+
+                <label>Message</label>
+
+                <textarea
+                  name="message"
+                  required
+                  placeholder="Describe how we can help…"
+                ></textarea>
+
+              </div>
+
+              <button type="submit" class="submit-btn">
+                Send Message
+              </button>
+
+            </form>
+
+            <div
+              class="form-success"
+              id="form-success"
+            >
+              ✓ Message received! We'll get back to you within 12–24 hours.
+            </div>
+
+            <div
+              id="form-error"
+              style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:11px 14px;font-size:13px;color:#dc2626;margin-top:10px"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="support-footer">
+        Copyright © 2026 City Metro. All rights reserved.
+      </div>
+
+    </div>
+
+    <!-- IFRAME PAGES -->
+
+    <div class="iframe-page" id="page-arrivals">
+      <div class="iframe-loading" id="loading-arrivals">
+        <div class="spinner"></div>
+        <div class="loading-lbl">Loading Live Arrivals…</div>
+      </div>
+
+      <iframe
+        id="frame-arrivals"
+        title="Live Arrivals"
+        allowfullscreen
+      ></iframe>
+    </div>
+
+    <div class="iframe-page" id="page-planner">
+      <div class="iframe-loading" id="loading-planner">
+        <div class="spinner"></div>
+        <div class="loading-lbl">Loading Trip Planner…</div>
+      </div>
+
+      <iframe
+        id="frame-planner"
+        title="Trip Planner"
+        allowfullscreen
+      ></iframe>
+    </div>
+
+    <div class="iframe-page" id="page-map">
+      <div class="iframe-loading" id="loading-map">
+        <div class="spinner"></div>
+        <div class="loading-lbl">Loading System Map…</div>
+      </div>
+
+      <iframe
+        id="frame-map"
+        title="System Map"
+        allowfullscreen
+      ></iframe>
+    </div>
+
+    <div class="iframe-page" id="page-alerts">
+      <div class="iframe-loading" id="loading-alerts">
+        <div class="spinner"></div>
+        <div class="loading-lbl">Loading Service Alerts…</div>
+      </div>
+
+      <iframe
+        id="frame-alerts"
+        title="Service Alerts"
+        allowfullscreen
+      ></iframe>
+    </div>
+
+    <!-- BRICKPASS — opens in new tab if iframe blocked -->
+    <div class="iframe-page" id="page-brickpass">
+
+      <div class="iframe-loading" id="loading-brickpass">
+        <div class="spinner"></div>
+        <div class="loading-lbl">Loading My BrickPass…</div>
+      </div>
+
+      <div
+        class="iframe-blocked"
+        id="blocked-brickpass"
+        style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;background:var(--bg)"
+      >
+
+        <div style="font-size:40px;margin-bottom:16px">
+          🎫
+        </div>
+
+        <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px">
+          My BrickPass
+        </div>
+
+        <div style="font-size:13px;color:var(--muted);margin-bottom:24px;max-width:260px;line-height:1.5">
+          BrickPass needs to open in your browser for the best experience.
+        </div>
+
+        <a
+          href="https://mybrickpass.citymetro.xyz"
+          target="_blank"
+          rel="noopener"
+          style="background:var(--navy);color:white;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase"
+        >
+          Open My BrickPass ↗
+        </a>
+
+      </div>
+
+      <iframe
+        id="frame-brickpass"
+        title="My BrickPass"
+        allowfullscreen
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+      ></iframe>
+
+    </div>
+
+  </div>
+
+  <!-- BOTTOM TAB BAR -->
+  <nav class="tabbar">
+
+    <button
+      class="tab active"
+      id="tab-home"
+      onclick="navTo('home')"
+    >
+      <div class="tab-icon-wrap">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/>
+          <polyline points="9 21 9 12 15 12 15 21"/>
+        </svg>
+      </div>
+      <span class="tab-lbl">Home</span>
+    </button>
+
+    <button
+      class="tab"
+      id="tab-arrivals"
+      onclick="navTo('arrivals')"
+    >
+      <div class="tab-icon-wrap">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <span class="tab-lbl">Arrivals</span>
+    </button>
+
+    <button
+      class="tab"
+      id="tab-planner"
+      onclick="navTo('planner')"
+    >
+      <div class="tab-icon-wrap">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+        </svg>
+      </div>
+      <span class="tab-lbl">Planner</span>
+    </button>
+
+    <button
+      class="tab"
+      id="tab-map"
+      onclick="navTo('map')"
+    >
+      <div class="tab-icon-wrap">
+        <svg viewBox="0 0 24 24">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+          <line x1="8" y1="2" x2="8" y2="18"/>
+          <line x1="16" y1="6" x2="16" y2="22"/>
+        </svg>
+      </div>
+      <span class="tab-lbl">Map</span>
+    </button>
+
+    <button
+      class="tab"
+      id="tab-alerts"
+      onclick="navTo('alerts')"
+    >
+      <div class="tab-icon-wrap">
+        <svg viewBox="0 0 24 24">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 01-3.46 0"/>
+        </svg>
+      </div>
+      <span class="tab-lbl">Alerts</span>
+    </button>
+
+    <button
+      class="tab"
+      id="tab-brickpass"
+      onclick="navTo('brickpass')"
+    >
+      <div class="tab-icon-wrap">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect x="2" y="5" width="20" height="14" rx="2"/>
+          <line x1="2" y1="10" x2="22" y2="10"/>
+        </svg>
+      </div>
+      <span class="tab-lbl">BrickPass</span>
+    </button>
+
+  </nav>
+
+  <!-- SSO handled via redirect to sso.citymetro.xyz -->
+
+</div>
+
+<script>
+
+/* ── External page URLs ── */
+
+const PAGES = {
+  arrivals:  'https://trip-planner.citymetro.xyz',
+  planner:   'https://trip-planner.citymetro.xyz/planner',
+  map:       'https://map.citymetro.xyz',
+  alerts:    'https://alerts.citymetro.xyz',
+  brickpass: 'https://mybrickpass.citymetro.xyz',
+};
+
+const TITLES = {
+  home: 'City Metro',
+  arrivals: 'Live Arrivals',
+  planner: 'Trip Planner',
+  map: 'System Map',
+  alerts: 'Service Alerts',
+  support: 'Support',
+  brickpass: 'My BrickPass',
+};
+
+
+/* ── Greeting ── */
+
+const h = new Date().getHours();
+
+document.getElementById('greeting').textContent =
+  h < 12 ? 'morning' :
+  h < 17 ? 'afternoon' :
+  'evening';
+
+
+/* ══════════════════════════════════════════════
+   SSO — Real auth via sso.citymetro.xyz
+══════════════════════════════════════════════ */
+
+const SSO_URL = 'https://sso.citymetro.xyz';
+const SSO_API = 'https://citymetrosso.felixfeger46.workers.dev';
+
+let currentUser = null;
+
+
+async function loadSession() {
+
+  // Check if returning from SSO with a token
+
+  const params = new URLSearchParams(location.search);
+  const urlToken = params.get('token');
+
+  if (urlToken) {
+
+    localStorage.setItem('cm_token', urlToken);
+
+    // Restore the page the user was on when they clicked Sign In
+
+    const savedPage =
+      localStorage.getItem('cm_sso_return_page');
+
+    localStorage.removeItem('cm_sso_return_page');
+
+    // Clean URL
+
+    history.replaceState({}, '', location.pathname);
+
+    // Fetch full user info with the new token
+
+    try {
+
+      const res = await fetch(`${SSO_API}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${urlToken}`
+        }
+      });
+
+      if (res.ok) {
+
+        currentUser = await res.json();
+
+        localStorage.setItem(
+          'cm_user',
+          JSON.stringify(currentUser)
+        );
+
+      }
+
+    } catch {}
+
+    // Even if fetch failed, try stored user data
+
+    if (!currentUser) {
+
+      try {
+        currentUser =
+          JSON.parse(localStorage.getItem('cm_user'));
+      } catch {}
+
+    }
+
+    updateAuthUI();
+
+    const returnPage = savedPage || 'support';
+
+    if (
+      returnPage &&
+      (
+        PAGES[returnPage] ||
+        returnPage === 'support' ||
+        returnPage === 'home'
+      )
+    ) {
+      navTo(returnPage);
+    }
+
+    return;
+  }
+
+
+  // No new token — check existing session
+
+  const token = localStorage.getItem('cm_token');
+
+  if (!token) {
+    updateAuthUI();
+    return;
+  }
+
+
+  // Try to validate with API
+
+  try {
+
+    const res = await fetch(`${SSO_API}/auth/me`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (res.ok) {
+
+      currentUser = await res.json();
+
+      localStorage.setItem(
+        'cm_user',
+        JSON.stringify(currentUser)
+      );
+
+    } else {
+
+      // Token rejected by server
+
+      localStorage.removeItem('cm_token');
+      localStorage.removeItem('cm_user');
+
+      currentUser = null;
+    }
+
+  } catch {
+
+    // Network error — use cached user data
+
+    try {
+      currentUser =
+        JSON.parse(localStorage.getItem('cm_user'));
+    } catch {}
+
+  }
+
+  updateAuthUI();
+}
+
+
+function openSSO() {
+
+  // Save current page
+
+  localStorage.setItem(
+    'cm_sso_return_page',
+    current
+  );
+
+  const redirect =
+    encodeURIComponent(
+      window.location.href.split('?')[0]
+    );
+
+  window.location.href =
+    `${SSO_URL}?redirect=${redirect}`;
+}
+
+
+async function signOut() {
+
+  const token =
+    localStorage.getItem('cm_token');
+
+  if (token) {
+
+    try {
+
+      await fetch(`${SSO_API}/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+    } catch {}
+
+  }
+
+  localStorage.removeItem('cm_token');
+  localStorage.removeItem('cm_user');
+
+  currentUser = null;
+
+  updateAuthUI();
+}
+
+
+function updateAuthUI() {
+
+  const bar =
+    document.getElementById('support-auth-bar');
+
+  const name =
+    document.getElementById('support-auth-name');
+
+  const btn =
+    document.getElementById('support-auth-btn');
+
+  const ava =
+    document.getElementById('support-avatar');
+
+
+  if (currentUser) {
+
+    bar.classList.add('signed-in');
+
+    name.textContent =
+      currentUser.name ||
+      `${currentUser.firstName} ${currentUser.lastName}`;
+
+    ava.textContent =
+      (
+        currentUser.name ||
+        `${currentUser.firstName} ${currentUser.lastName}`
+      )
+      .split(' ')
+      .map(w => w[0])
+      .join('')
+      .toUpperCase()
+      .slice(0,2);
+
+    btn.textContent = 'Sign Out';
+
+    btn.className = 'auth-btn sign-out';
+
+    btn.onclick = signOut;
+
+
+    // Auto-fill support form
+
+    const nameEl =
+      document.querySelector(
+        '#support-form [name="name"]'
+      );
+
+    const emailEl =
+      document.querySelector(
+        '#support-form [name="email"]'
+      );
+
+    if (nameEl) {
+      nameEl.value =
+        currentUser.name ||
+        `${currentUser.firstName} ${currentUser.lastName}`;
+    }
+
+    if (emailEl) {
+      emailEl.value =
+        currentUser.email;
+    }
+
+
+  } else {
+
+    bar.classList.remove('signed-in');
+
+    name.textContent = 'Not signed in';
+
+    ava.textContent = '?';
+
+    btn.textContent = 'Sign In';
+
+    btn.className = 'auth-btn sign-in';
+
+    btn.onclick = openSSO;
+
+
+    const nameEl =
+      document.querySelector(
+        '#support-form [name="name"]'
+      );
+
+    const emailEl =
+      document.querySelector(
+        '#support-form [name="email"]'
+      );
+
+    if (nameEl) nameEl.value = '';
+
+    if (emailEl) emailEl.value = '';
+
+  }
+
+}
+
+
+/* ══════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════ */
+
+let current = 'home';
+
+const loaded = new Set();
+
+
+function navTo(page) {
+
+  closeDrawer();
+
+  document
+    .querySelectorAll('.page, .iframe-page')
+    .forEach(el => el.classList.remove('active'));
+
+  document
+    .querySelectorAll('.tab, .drawer-item')
+    .forEach(el => el.classList.remove('active'));
+
+
+  document
+    .getElementById(`page-${page}`)
+    .classList.add('active');
+
+  document
+    .getElementById(`tab-${page}`)
+    ?.classList.add('active');
+
+  document
+    .getElementById(`di-${page}`)
+    ?.classList.add('active');
+
+
+  document.getElementById('topbar-title').textContent =
+    TITLES[page] || 'City Metro';
+
+
+  if (PAGES[page] && !loaded.has(page)) {
+
+    loaded.add(page);
+
+    const frame =
+      document.getElementById(`frame-${page}`);
+
+    const loading =
+      document.getElementById(`loading-${page}`);
+
+
+    if (page === 'brickpass') {
+
+      // Try iframe first
+
+      frame.src = PAGES[page];
+
+      let loadedOk = false;
+
+
+      frame.onload = () => {
+
+        loadedOk = true;
+
+        loading.classList.add('done');
+
+        // Try to detect if page was blocked
+
+        try {
+
+          const doc =
+            frame.contentDocument;
+
+          if (
+            !doc ||
+            doc.body?.innerHTML === ''
+          ) {
+            throw new Error();
+          }
+
+        } catch {
+
+          frame.style.display = 'none';
+
+          document
+            .getElementById('blocked-brickpass')
+            .style.display = 'flex';
+
+        }
+
+      };
+
+
+      frame.onerror = () => {
+
+        loading.classList.add('done');
+
+        frame.style.display = 'none';
+
+        document
+          .getElementById('blocked-brickpass')
+          .style.display = 'flex';
+
+      };
+
+
+      // Timeout fallback
+
+      setTimeout(() => {
+
+        if (!loadedOk) {
+
+          loading.classList.add('done');
+
+          frame.style.display = 'none';
+
+          document
+            .getElementById('blocked-brickpass')
+            .style.display = 'flex';
+
+        }
+
+      }, 5000);
+
+
+    } else {
+
+      frame.src = PAGES[page];
+
+      frame.onload = () =>
+        loading.classList.add('done');
+
+    }
+
+  }
+
+
+  current = page;
+
+  history.pushState(
+    { page },
+    '',
+    `/?page=${page}`
+  );
+}
+
+
+/* ── Drawer ── */
+
+function toggleDrawer() {
+
+  document
+    .getElementById('drawer')
+    .classList.toggle('open');
+
+  document
+    .getElementById('drawer-overlay')
+    .classList.toggle('open');
+}
+
+
+function closeDrawer() {
+
+  document
+    .getElementById('drawer')
+    .classList.remove('open');
+
+  document
+    .getElementById('drawer-overlay')
+    .classList.remove('open');
+}
+
+
+/* ══════════════════════════════════════════════
+   SEARCH
+══════════════════════════════════════════════ */
+
+const SEARCH_INDEX = [
+
+  {
+    label: 'Live Arrivals',
+    desc: 'Real-time train times',
+    action: () => navTo('arrivals')
+  },
+
+  {
+    label: 'Trip Planner',
+    desc: 'Plan a journey',
+    action: () => navTo('planner')
+  },
+
+  {
+    label: 'System Map',
+    desc: 'View the rail network',
+    action: () => navTo('map')
+  },
+
+  {
+    label: 'Service Alerts',
+    desc: 'Disruptions & announcements',
+    action: () => navTo('alerts')
+  },
+
+  {
+    label: 'My BrickPass',
+    desc: 'Manage your transit pass',
+    action: () => navTo('brickpass')
+  },
+
+  {
+    label: 'Support',
+    desc: 'Contact our team',
+    action: () => navTo('support')
+  },
+
+  {
+    label: 'Union Station',
+    desc: 'A · E · K Lines',
+    action: () => navTo('arrivals')
+  },
+
+  {
+    label: 'Airport Metro TC',
+    desc: 'A · E · F Lines',
+    action: () => navTo('arrivals')
+  },
+
+  {
+    label: 'Downtown Lego City',
+    desc: 'A · E Lines',
+    action: () => navTo('arrivals')
+  },
+
+  {
+    label: 'Santa Mooica',
+    desc: 'A Line terminus',
+    action: () => navTo('arrivals')
+  },
+
+  {
+    label: 'Table Central',
+    desc: 'E Line terminus',
+    action: () => navTo('arrivals')
+  },
+
+  {
+    label: 'Asian Town',
+    desc: 'K Line terminus',
+    action: () => navTo('arrivals')
+  },
+
+  {
+    label: 'FLX Terminal 2',
+    desc: 'F Line terminus',
+    action: () => navTo('arrivals')
+  },
+
+  {
+    label: 'Phone: 213-600-6570',
+    desc: 'M–F 3:30–6 PM · Sat–Sun 9–9 PM',
+    action: () => navTo('support')
+  },
+
+  {
+    label: 'Email: hello@citymetro.xyz',
+    desc: '12–24 hr response',
+    action: () => navTo('support')
+  }
+
+];
+
+
+function handleSearch(val) {
+
+  const q =
+    val.trim().toLowerCase();
+
+  const res =
+    document.getElementById('search-results');
+
+  const inner =
+    document.getElementById('search-results-inner');
+
+
+  if (!q) {
+
+    res.style.display = 'none';
+
+    return;
+  }
+
+
+  res.style.display = 'block';
+
+
+  const matches =
+    SEARCH_INDEX.filter(i =>
+      i.label.toLowerCase().includes(q) ||
+      i.desc.toLowerCase().includes(q)
+    );
+
+
+  if (!matches.length) {
+
+    inner.innerHTML = `
+      <div style="
+        padding:16px 0;
+        text-align:center;
+        color:var(--muted);
+        font-size:14px
+      ">
+        No results for "${val}"
+      </div>
+    `;
+
+    return;
+  }
+
+
+  inner.innerHTML =
+    matches.map((m, idx) => `
+
+      <div
+        onclick="searchItems[${idx}]()"
+        style="
+          display:flex;
+          align-items:center;
+          gap:12px;
+          background:var(--surface);
+          border:1px solid var(--border);
+          border-radius:10px;
+          padding:12px 14px;
+          margin-bottom:8px;
+          cursor:pointer;
+        "
+      >
+
+        <div style="flex:1">
+
+          <div style="
+            font-size:14px;
+            font-weight:600;
+            color:var(--text)
+          ">
+            ${m.label}
+          </div>
+
+          <div style="
+            font-size:11px;
+            color:var(--muted);
+            margin-top:2px
+          ">
+            ${m.desc}
+          </div>
+
+        </div>
+
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--muted2)"
+          stroke-width="2"
+        >
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+
+      </div>
+
+    `).join('');
+
+
+  window.searchItems =
+    matches.map(m => m.action);
+}
+
+
+/* ══════════════════════════════════════════════
+   SUPPORT FORM — submits to SSO API
+══════════════════════════════════════════════ */
+
+async function submitForm(e) {
+
+  e.preventDefault();
+
+  const form = e.target;
+
+  const data =
+    new FormData(form);
+
+  const btn =
+    form.querySelector(
+      'button[type="submit"]'
+    ) ||
+    form.querySelector('.submit-btn');
+
+  const successEl =
+    document.getElementById('form-success');
+
+  const errorEl =
+    document.getElementById('form-error');
+
+
+  if (errorEl) {
+    errorEl.style.display = 'none';
+  }
+
+  if (successEl) {
+    successEl.style.display = 'none';
+  }
+
+
+  if (btn) {
+
+    btn.disabled = true;
+
+    btn.textContent = 'Sending…';
+
+  }
+
+
+  try {
+
+    const payload = {
+
+      name:
+        data.get('name'),
+
+      email:
+        data.get('email'),
+
+      subject:
+        data.get('subject'),
+
+      message:
+        data.get('message'),
+
+      userId:
+        currentUser?.id || null,
+
+    };
+
+
+    const res =
+      await fetch(
+        `${SSO_API}/support/contact`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'application/json'
+          },
+          body:
+            JSON.stringify(payload),
+        }
+      );
+
+
+    const json =
+      await res.json();
+
+
+    if (!res.ok) {
+      throw new Error(
+        json.error ||
+        'Submission failed'
+      );
+    }
+
+
+    if (successEl) {
+      successEl.style.display = 'block';
+    }
+
+
+    form.reset();
+
+
+    // Re-fill user fields if signed in
+
+    if (currentUser) {
+
+      const nameEl =
+        form.elements.name;
+
+      const emailEl =
+        form.elements.email;
+
+
+      if (nameEl) {
+        nameEl.value =
+          currentUser.name || '';
+      }
+
+      if (emailEl) {
+        emailEl.value =
+          currentUser.email || '';
+      }
+
+    }
+
+
+    if (btn) {
+      btn.textContent =
+        'Message Sent ✓';
+    }
+
+
+  } catch (err) {
+
+    if (errorEl) {
+
+      errorEl.textContent =
+        err.message;
+
+      errorEl.style.display =
+        'block';
+
+    }
+
+
+    if (btn) {
+
+      btn.disabled = false;
+
+      btn.textContent =
+        'Send Message';
+
+    }
+
+  }
+
+}
+
+
+/* ── Deep link + init ── */
+
+(async () => {
+
+  await loadSession();
+
+  // Only handle ?page= deep link
+  // if loadSession didn't already navigate
+
+  const urlPage =
+    new URLSearchParams(
+      location.search
+    ).get('page');
+
+
+  if (
+    urlPage &&
+    (
+      PAGES[urlPage] ||
+      urlPage === 'support' ||
+      urlPage === 'home'
+    )
+  ) {
+
+    navTo(urlPage);
+
+  }
+
+})();
+
+
+window.addEventListener(
+  'popstate',
+  e => {
+    if (e.state?.page) {
+      navTo(e.state.page);
+    }
+  }
+);
+
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+
+</script>
+
+</body>
+</html>
