@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <meta name="theme-color" content="#ffffff"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="apple-mobile-web-app-title" content="City Metro"/>
@@ -152,9 +153,9 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke
 /* ═════ CONFIG: edit these ═════ */
 const CFG = {
   alertsApi:  'https://ride-metro.felixfeger46.workers.dev',
-  supportApi: 'https://api.mobile.citymetro.xyz', // support-worker URL
+  supportApi: 'https://city-metro-support.YOUR-SUBDOMAIN.workers.dev', // support-worker URL
   issuer:     'https://auth.citymetro.xyz/application/o/city-metro-app/', // keep trailing slash
-  clientId:   'bOQMzKD2bqI0GOgLr0shGu14dOjqxNcIqSlk3DnY',
+  clientId:   'REPLACE_WITH_AUTHENTIK_CLIENT_ID',
 };
 const FRAMES = {
   transit:   'https://trip-planner.citymetro.xyz',
