@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="robots" content="noindex"/>
+<meta name="theme-color" content="#ffffff"/>
+<title>Support tickets · City Metro</title>
+<style>
+:root{--blue:#2347d6;--ink:#0a0a0a;--bg:#eceef3;--soft:#f1f3f5;--line:#e5e7eb;--muted:#6b7280;--font:'Helvetica Neue',Helvetica,Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
+button,input{font:inherit;color:inherit}
+header{background:#fff;border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top,0px) + 10px) 20px 10px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5}
+header img{width:36px;height:36px;border-radius:50%}
+header b{font-size:20px;letter-spacing:-.01em}header b i{font-style:normal;color:var(--blue)}
+header span{color:var(--muted);font-size:14px;flex:1}
+.pill{border:0;border-radius:999px;padding:9px 16px;font-weight:700;font-size:14px;cursor:pointer;background:var(--ink);color:#fff}
+.pill.light{background:var(--soft);color:var(--ink)}.pill.danger{background:#fee2e2;color:#991b1b}
+main{max-width:860px;margin:0 auto;padding:18px 16px 60px}
+.center{text-align:center;padding:90px 20px}.center h1{font-size:26px;margin-bottom:8px}.center p{color:var(--muted);margin-bottom:20px}
+.bar{background:var(--ink);color:#fff;border-radius:22px;padding:6px;display:flex;gap:4px;overflow-x:auto;margin-bottom:12px}
+.tab{flex:1;white-space:nowrap;border:0;background:none;color:#fff;opacity:.7;padding:11px 14px;border-radius:18px;font-weight:700;font-size:14px;cursor:pointer}
+.tab.on{background:#fff;color:var(--ink);opacity:1}.tab small{font-weight:600;margin-left:4px;opacity:.6}
+.search{width:100%;border:0;background:#fff;border-radius:999px;padding:13px 18px;font-size:15px;margin-bottom:12px;outline:0}
+.t{background:#fff;border-radius:18px;margin-bottom:10px;overflow:hidden}
+.th{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;cursor:pointer}
+.id{color:var(--muted);font-size:13px;font-weight:700;min-width:38px;padding-top:2px}
+.tm{flex:1;min-width:0}.tm b{display:block;font-size:15px}.tm span{display:block;color:var(--muted);font-size:13px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st{font-size:12px;font-weight:700;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.st.open{background:#fee2e2;color:#991b1b}.st.in_progress{background:#fef3c7;color:#78350f}.st.resolved{background:#d1fae5;color:#065f46}
+.body{display:none;padding:0 16px 16px 66px;border-top:1px solid var(--line)}.t.open-t .body{display:block}
+.msg{white-space:pre-wrap;line-height:1.5;font-size:15px;margin:14px 0}
+.meta{font-size:13px;color:var(--muted);margin-bottom:14px}.meta a{color:var(--blue);font-weight:600;text-decoration:none}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.empty{text-align:center;color:var(--muted);padding:50px 0}
+.err{background:#fee2e2;color:#991b1b;border-radius:14px;padding:12px 16px;margin-bottom:12px;display:none}
+</style>
+</head>
+<body>
+<header><img src="icons/icon-192.png" alt=""/><b>City <i>Metro</i></b><span>Support tickets</span><button class="pill light" id="out" style="display:none" onclick="signOut()">Sign out</button></header>
+<main id="main"></main>
+<script>
+const CFG = {
+  supportApi: 'https://api.mobile.citymetro.xyz',
+  issuer:     'https://auth.citymetro.xyz/application/o/city-metro-app/',
+  clientId:   'REPLACE_WITH_AUTHENTIK_CLIENT_ID', // same client as the app
+};
+const REDIRECT = location.origin + location.pathname;   // register this exact URL in Authentik
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const b64u = b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+let _d; const disc = async () => _d || (_d = await (await fetch(CFG.issuer + '.well-known/openid-configuration')).json());
+const LABEL = {open:'Open', in_progress:'In progress', resolved:'Resolved'};
+let sess = null, all = [], filter = 'open', q = '', openId = null;
+
+function read(){ try{ const s = JSON.parse(localStorage.getItem('cm_admin')); if (s && s.exp * 1000 > Date.now()) return s; }catch{} localStorage.removeItem('cm_admin'); return null; }
+async function signIn(){
+  const v = b64u(crypto.getRandomValues(new Uint8Array(32)));
+  const c = b64u(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v)));
+  const st = b64u(crypto.getRandomValues(new Uint8Array(16)));
+  localStorage.setItem('cm_admin_pkce', JSON.stringify({v, st}));
+  const d = await disc();
+  location.href = d.authorization_endpoint + '?' + new URLSearchParams({response_type:'code', client_id:CFG.clientId, redirect_uri:REDIRECT, scope:'openid profile email', state:st, code_challenge:c, code_challenge_method:'S256'});
+}
+async function callback(){
+  const q = new URLSearchParams(location.search), code = q.get('code'); if (!code) return;
+  let sv; try{ sv = JSON.parse(localStorage.getItem('cm_admin_pkce')); }catch{}
+  localStorage.removeItem('cm_admin_pkce'); history.replaceState({}, '', location.pathname);
+  if (!sv || sv.st !== q.get('state')) return;
+  try{
+    const d = await disc();
+    const t = await (await fetch(d.token_endpoint, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams({grant_type:'authorization_code', code, redirect_uri:REDIRECT, client_id:CFG.clientId, code_verifier:sv.v})})).json();
+    const p = JSON.parse(decodeURIComponent(escape(atob(t.id_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));
+    localStorage.setItem('cm_admin', JSON.stringify({idt:t.id_token, exp:p.exp, name:p.name || p.email || ''}));
+  }catch{}
+}
+function signOut(){ localStorage.removeItem('cm_admin'); sess = null; boot(); }
+
+async function api(path, opt = {}){
+  const r = await fetch(CFG.supportApi + path, {...opt, headers:{'Content-Type':'application/json', Authorization:'Bearer ' + sess.idt}});
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok){ const e = new Error(j.error || 'Request failed'); e.status = r.status; throw e; }
+  return j;
+}
+function gate(title, text, btn){
+  $('main').innerHTML = `<div class="center"><h1>${title}</h1><p>${text}</p>${btn ? `<button class="pill" onclick="${btn[1]}">${btn[0]}</button>` : ''}</div>`;
+}
+async function load(){
+  try{ all = await api('/messages'); render(); }
+  catch(e){
+    if (e.status === 403) gate('Not authorized', 'Your account isn\'t in the admin group.', ['Sign out', 'signOut()']);
+    else if (e.status === 401) { localStorage.removeItem('cm_admin'); gate('Session expired', 'Please sign in again.', ['Sign in', 'signIn()']); }
+    else { render(); $('err').textContent = e.message; $('err').style.display = 'block'; }
+  }
+}
+const when = s => new Date(s.replace(' ','T') + 'Z').toLocaleString([], {dateStyle:'medium', timeStyle:'short'});
+function render(){
+  const cnt = s => all.filter(m => m.status === s).length;
+  const needle = q.trim().toLowerCase();
+  const list = all.filter(m => (filter === 'all' || m.status === filter) &&
+    (!needle || [m.name, m.email, m.subject, m.message, '#' + m.id].some(x => String(x).toLowerCase().includes(needle))));
+  $('main').innerHTML = `
+    <div class="err" id="err"></div>
+    <div class="bar">${[['open','Open'],['in_progress','In progress'],['resolved','Resolved'],['all','All']].map(([k,l]) =>
+      `<button class="tab ${filter===k?'on':''}" onclick="filter='${k}';render()">${l}<small>${k==='all'?all.length:cnt(k)}</small></button>`).join('')}</div>
+    <input class="search" placeholder="Search name, email, topic or message" value="${esc(q)}" oninput="q=this.value;render();this.focus()"/>
+    ${list.map(m => `
+      <div class="t ${openId===m.id?'open-t':''}">
+        <div class="th" onclick="openId=openId===${m.id}?null:${m.id};render()">
+          <div class="id">#${m.id}</div>
+          <div class="tm"><b>${esc(m.subject)}</b><span>${esc(m.name)} · ${esc(m.message)}</span></div>
+          <div class="st ${m.status}">${LABEL[m.status]}</div>
+        </div>
+        <div class="body">
+          <div class="msg">${esc(m.message)}</div>
+          <div class="meta">${esc(m.name)} · <a href="mailto:${esc(m.email)}?subject=${encodeURIComponent('Re: ' + m.subject + ' (#' + m.id + ')')}">${esc(m.email)}</a> · ${when(m.created_at)}${m.user_sub ? ' · signed-in user' : ''}</div>
+          <div class="acts">
+            ${['open','in_progress','resolved'].filter(s => s !== m.status).map(s => `<button class="pill light" onclick="setStatus(${m.id},'${s}')">Mark ${LABEL[s].toLowerCase()}</button>`).join('')}
+            <button class="pill danger" onclick="del(${m.id})">Delete</button>
+          </div>
+        </div>
+      </div>`).join('') || '<div class="empty">No tickets here.</div>'}`;
+}
+async function setStatus(id, status){
+  try{ await api('/messages/' + id, {method:'PATCH', body:JSON.stringify({status})}); all.find(m => m.id === id).status = status; render(); }
+  catch(e){ alert(e.message); }
+}
+async function del(id){
+  if (!confirm('Delete ticket #' + id + '? This can\'t be undone.')) return;
+  try{ await api('/messages/' + id, {method:'DELETE'}); all = all.filter(m => m.id !== id); openId = null; render(); }
+  catch(e){ alert(e.message); }
+}
+async function boot(){
+  await callback(); sess = read();
+  $('out').style.display = sess ? '' : 'none';
+  if (!sess) return gate('Support tickets', 'Sign in with your City Metro account to view messages.', ['Sign in', 'signIn()']);
+  gate('Loading…', ''); load();
+}
+boot();
+setInterval(() => { if (sess && !document.hidden && !document.activeElement?.matches('input')) load(); }, 60000);
+</script>
+</body>
+</html>
