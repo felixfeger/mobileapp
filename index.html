@@ -22,7 +22,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .app{height:100dvh;display:flex;flex-direction:column;padding-top:var(--st);background:#fff}
 .topbar{height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line);background:#fff;z-index:20}
 .brand{display:flex;align-items:center;gap:12px;background:none;border:0;cursor:pointer}
-.brand img{width:36px;height:36px;border-radius:50%}
+.brand img{width:36px;height:36px;object-fit:contain;background:none}
 .brand b{font-size:20px;font-weight:700;letter-spacing:-.01em}.brand b i{font-style:normal;color:var(--blue)}
 .icon-btn{width:40px;height:40px;border:0;background:none;display:grid;place-items:center;border-radius:10px;cursor:pointer}
 .icon-btn:active{background:var(--soft)}
@@ -58,7 +58,8 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .bar{background:var(--ink);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-radius:22px}
 .bar h2{font-size:18px;font-weight:700}.bar span{font-size:13px;opacity:.7}
 .row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line)}.row:last-child{border:0}
-.badge{min-width:34px;height:34px;padding:0 8px;border-radius:999px;color:#fff;font-weight:700;font-size:15px;display:grid;place-items:center}
+.lico{width:36px;height:36px;object-fit:contain;flex-shrink:0}
+.badge{width:36px;height:36px;flex-shrink:0;border-radius:50%;color:#fff;font-weight:700;font-size:15px;display:grid;place-items:center}
 .row .n{flex:1;font-size:15px;font-weight:600}
 .st{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}.st:before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
 .st.ok{color:var(--good)}.st.mid{color:var(--warn)}.st.bad{color:var(--bad)}
@@ -70,8 +71,8 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .drawer{position:fixed;top:0;right:0;bottom:0;width:300px;max-width:86vw;background:#fff;z-index:60;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;padding-top:var(--st);border-radius:22px 0 0 22px}
 .drawer.open{transform:none}
 .acct{margin:16px;background:var(--ink);color:#fff;border-radius:20px;padding:16px;display:flex;align-items:center;gap:12px}
-.av{width:42px;height:42px;border-radius:50%;background:#fff;color:var(--ink);display:grid;place-items:center;font-weight:700;flex-shrink:0}
-.acct div{flex:1;min-width:0}.acct b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.acct small{font-size:12px;opacity:.7}
+.av{width:42px;height:42px;flex:none!important;border-radius:50%;background:#fff;color:var(--ink);display:grid;place-items:center;font-weight:700}
+.acct>div:not(.av){flex:1;min-width:0}.acct b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.acct small{font-size:12px;opacity:.7}
 .pill{border:0;background:#fff;color:var(--ink);border-radius:999px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer}
 .dnav{flex:1;overflow-y:auto;padding:4px 10px}
 .ditem{display:flex;align-items:center;gap:14px;width:100%;padding:13px 12px;border:0;background:none;border-radius:12px;font-size:16px;font-weight:600;text-align:left;cursor:pointer}
@@ -97,7 +98,7 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke
 <body>
 <div class="app">
   <header class="topbar">
-    <button class="brand" onclick="navTo('home')" aria-label="City Metro home"><img src="icons/icon-192.png" alt=""/><b>City <i>Metro</i></b></button>
+    <button class="brand" onclick="navTo('home')" aria-label="City Metro home"><img src="icons/logo.png" onerror="this.onerror=null;this.src='icons/icon-192.png'" alt=""/><b>City <i>Metro</i></b></button>
     <button class="icon-btn" onclick="drawer(true)" aria-label="Menu"><svg class="i" viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg></button>
   </header>
 
@@ -153,9 +154,9 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke
 /* ═════ CONFIG: edit these ═════ */
 const CFG = {
   alertsApi:  'https://ride-metro.felixfeger46.workers.dev',
-  supportApi: 'https://api.mobile.citymetro.xyz', // support-worker URL
+  supportApi: 'https://city-metro-support.YOUR-SUBDOMAIN.workers.dev', // support-worker URL
   issuer:     'https://auth.citymetro.xyz/application/o/city-metro-app/', // keep trailing slash
-  clientId:   'bOQMzKD2bqI0GOgLr0shGu14dOjqxNcIqSlk3DnY',
+  clientId:   'REPLACE_WITH_AUTHENTIK_CLIENT_ID',
 };
 const FRAMES = {
   transit:   'https://trip-planner.citymetro.xyz',
@@ -214,6 +215,13 @@ const STATUS = {
 };
 const OVERALL = {operational:'All lines running', partial_outage:'Some delays', major_outage:'Major disruption', critical:'Critical disruption', emergency:'Emergency',
   maintenance:'Maintenance scheduled', maintenance_active:'Maintenance in progress'};
+// The alerts worker stores each line's picture on the line record; find it whatever the field is called.
+function lineImg(l){
+  const ok = v => typeof v === 'string' && /^(data:image\/|https?:\/\/.+\.(png|svg|jpe?g|webp|gif)(\?|$)|\/.+\.(png|svg|jpe?g|webp|gif)(\?|$))/i.test(v.trim());
+  for (const k of ['icon','image','img','logo','iconUrl','imageUrl','logoUrl','badge','symbol']) if (ok(l[k])) return l[k].trim();
+  const any = Object.values(l).find(ok);
+  return any ? any.trim() : '';
+}
 async function loadStatus(){
   try{
     const [s, a] = await Promise.all([
@@ -221,10 +229,12 @@ async function loadStatus(){
       fetch(CFG.alertsApi + '/api/announcement').then(r => r.json()).catch(() => null),
     ]);
     $('overall').textContent = OVERALL[s.overall] || '';
-    $('lines').innerHTML = (s.lineStatuses || []).map(l => {
+    $('lines').innerHTML = (s.lineStatuses || []).filter(l => !/accessib/i.test(`${l.id} ${l.name}`)).map(l => {
       const [label, cls] = STATUS[l.status] || STATUS.operational;
-      const short = esc(String(l.name).replace(/\s*line$/i,'').slice(0,3));
-      return `<div class="row"><div class="badge" style="background:${esc(l.color || '#444')}">${short}</div><div class="n">${esc(l.name)}</div><div class="st ${cls}">${label}</div></div>`;
+      const img = lineImg(l);
+      const short = esc(String(l.name).replace(/\s*line\s*/i,'').trim().slice(0,2));
+      const ico = img ? `<img class="lico" src="${esc(img)}" alt="" loading="lazy"/>` : `<div class="badge" style="background:${esc(l.color || '#444')}">${short}</div>`;
+      return `<div class="row">${ico}<div class="n">${esc(l.name)}</div><div class="st ${cls}">${label}</div></div>`;
     }).join('') || '<div class="empty">No lines to show.</div>';
     $('announce').innerHTML = a?.text ? `<div class="banner ${esc(a.type)}">${esc(a.text)}${a.link ? ` <a href="${esc(a.link)}" target="_blank" rel="noopener">Learn more</a>` : ''}</div>` : '';
   }catch{
