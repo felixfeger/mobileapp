@@ -19,7 +19,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;font-family:var(--font);background:#fff;color:var(--ink);-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit;color:inherit}
-.app{height:100dvh;display:flex;flex-direction:column;padding-top:var(--st);background:#fff}
+.app{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;padding-top:var(--st);background:#fff} /* fixed insets fill the real screen; 100dvh leaves a gap in iOS home-screen apps */
 .topbar{height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line);background:#fff;z-index:20}
 .brand{display:flex;align-items:center;gap:12px;background:none;border:0;cursor:pointer}
 .brand img{width:36px;height:36px;object-fit:contain;background:none}
@@ -156,7 +156,7 @@ const CFG = {
   alertsApi:  'https://ride-metro.felixfeger46.workers.dev',
   supportApi: 'https://city-metro-support.YOUR-SUBDOMAIN.workers.dev', // support-worker URL
   issuer:     'https://auth.citymetro.xyz/application/o/city-metro-app/', // keep trailing slash
-  clientId:   'bOQMzKD2bqI0GOgLr0shGu14dOjqxNcIqSlk3DnY',
+  clientId:   'REPLACE_WITH_AUTHENTIK_CLIENT_ID',
 };
 const FRAMES = {
   transit:   'https://trip-planner.citymetro.xyz',
