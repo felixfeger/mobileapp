@@ -157,6 +157,7 @@ const CFG = {
   supportApi: 'https://api.mobile.citymetro.xyz', // support-worker URL
   issuer:     'https://auth.citymetro.xyz/application/o/city-metro-app/', // keep trailing slash
   clientId:   'bOQMzKD2bqI0GOgLr0shGu14dOjqxNcIqSlk3DnY',
+  imgBase:    'https://alerts.citymetro.xyz/', // relative line images (e.g. "img/111.png") resolve against this
 };
 const FRAMES = {
   transit:   'https://trip-planner.citymetro.xyz',
@@ -215,12 +216,33 @@ const STATUS = {
 };
 const OVERALL = {operational:'All lines running', partial_outage:'Some delays', major_outage:'Major disruption', critical:'Critical disruption', emergency:'Emergency',
   maintenance:'Maintenance scheduled', maintenance_active:'Maintenance in progress'};
-// The alerts worker stores each line's picture on the line record; find it whatever the field is called.
-function lineImg(l){
-  const ok = v => typeof v === 'string' && /^(data:image\/|https?:\/\/.+\.(png|svg|jpe?g|webp|gif)(\?|$)|\/.+\.(png|svg|jpe?g|webp|gif)(\?|$))/i.test(v.trim());
-  for (const k of ['icon','image','img','logo','iconUrl','imageUrl','logoUrl','badge','symbol']) if (ok(l[k])) return l[k].trim();
-  const any = Object.values(l).find(ok);
-  return any ? any.trim() : '';
+// Each line record in the alerts worker can carry a picture. Field name and format vary, so look broadly.
+const IMG_EXT = /\.(png|svg|jpe?g|webp|gif|avif)(\?.*)?(#.*)?$/i;
+const IMG_KEY = /icon|image|img|logo|badge|symbol|svg|picture|photo|graphic/i;
+function toSrc(v){
+  v = v.trim();
+  if (/^<svg/i.test(v)) return 'data:image/svg+xml;utf8,' + encodeURIComponent(v);
+  if (/^data:image\//i.test(v) || /^https?:\/\//i.test(v)) return v;
+  try{ return new URL(v, CFG.imgBase).href; }catch{ return ''; }
+}
+function findImg(o, depth = 0){
+  if (!o || depth > 2) return '';
+  for (const [k, v] of Object.entries(o)){            // known image-ish keys first
+    if (typeof v === 'string' && v.trim() && IMG_KEY.test(k) && !/^(#|rgb|hsl)/i.test(v.trim()) && (IMG_EXT.test(v.trim()) || /^(data:image|<svg|https?:|\/|[\w-]+\/)/i.test(v.trim()))) return toSrc(v);
+  }
+  for (const v of Object.values(o)){                  // then any image-looking value, including nested
+    if (typeof v === 'string' && IMG_EXT.test(v.trim())) return toSrc(v);
+    if (v && typeof v === 'object' && !Array.isArray(v)){ const r = findImg(v, depth + 1); if (r) return r; }
+  }
+  return '';
+}
+const lineImg = findImg;
+// Hide accessibility entries (elevators, escalators, station accessibility) and anything that isn't a line.
+const isAccess = l => /accessib|elevator|escalator|\blift\b|\bramp\b/i.test([l.id, l.name, l.type, l.category, l.group, l.kind, l.mode].filter(x => typeof x === 'string').join(' '));
+const isLine = l => /\bline\b/i.test(l.name || '') || /bus|rail|train|metro|tram|line/i.test(String(l.type || l.mode || l.kind || ''));
+function badgeFallback(el){
+  const d = document.createElement('div'); d.className = 'badge'; d.style.background = el.dataset.c || '#444'; d.textContent = el.dataset.s || '';
+  el.replaceWith(d);
 }
 async function loadStatus(){
   try{
@@ -229,11 +251,11 @@ async function loadStatus(){
       fetch(CFG.alertsApi + '/api/announcement').then(r => r.json()).catch(() => null),
     ]);
     $('overall').textContent = OVERALL[s.overall] || '';
-    $('lines').innerHTML = (s.lineStatuses || []).filter(l => !/accessib/i.test(`${l.id} ${l.name}`)).map(l => {
+    $('lines').innerHTML = (s.lineStatuses || []).filter(l => !isAccess(l) && isLine(l)).map(l => {
       const [label, cls] = STATUS[l.status] || STATUS.operational;
       const img = lineImg(l);
-      const short = esc(String(l.name).replace(/\s*line\s*/i,'').trim().slice(0,2));
-      const ico = img ? `<img class="lico" src="${esc(img)}" alt="" loading="lazy"/>` : `<div class="badge" style="background:${esc(l.color || '#444')}">${short}</div>`;
+      const short = esc(String(l.name).replace(/\s*line\s*/i,'').trim().slice(0,3));
+      const ico = img ? `<img class="lico" src="${esc(img)}" alt="" data-s="${short}" data-c="${esc(l.color || '#444')}" onerror="badgeFallback(this)"/>` : `<div class="badge" style="background:${esc(l.color || '#444')}">${short}</div>`;
       return `<div class="row">${ico}<div class="n">${esc(l.name)}</div><div class="st ${cls}">${label}</div></div>`;
     }).join('') || '<div class="empty">No lines to show.</div>';
     $('announce').innerHTML = a?.text ? `<div class="banner ${esc(a.type)}">${esc(a.text)}${a.link ? ` <a href="${esc(a.link)}" target="_blank" rel="noopener">Learn more</a>` : ''}</div>` : '';
